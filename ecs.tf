@@ -21,9 +21,19 @@ resource "aws_ecs_service" "waggledance_service" {
     subnets         = ["${var.subnets}"]
   }
 
+  load_balancer {
+    container_name   = "waggledance"
+    container_port   = 48869
+    target_group_arn = "${aws_alb_target_group.waggledance_lb_target_group.arn}"
+  }
+
   service_registries {
     registry_arn = "${aws_service_discovery_service.metastore_proxy.arn}"
   }
+
+  depends_on = [
+    "aws_alb_listener.waggledance_lb_listener",
+  ]
 }
 
 resource "aws_ecs_task_definition" "waggledance" {
